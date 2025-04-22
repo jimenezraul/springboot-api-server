@@ -1,0 +1,18 @@
+ACCESS_TOKEN_PRIVATE_KEY_PATH: ${PRIVATE_KEY}
+ACCESS_TOKEN_PUBLIC_KEY_PATH: ${PUBLIC_KEY}
+REFRESH_TOKEN_PRIVATE_KEY_PATH: ${REFRESH_PRIVATE_KEY}
+REFRESH_TOKEN_PUBLIC_KEY_PATH: ${REFRESH_PUBLIC_KEY}
+spring:
+  config:
+    import: file:./env.properties
+  jpa:
+    hibernate:
+      ddl-auto: validate # validate, update, create, create-drop
+logging:
+  level:
+    org.springframework.security: DEBUG
+    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
+  file: logs/app.log
