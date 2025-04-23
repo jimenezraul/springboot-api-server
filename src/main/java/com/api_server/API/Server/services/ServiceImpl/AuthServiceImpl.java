@@ -43,6 +43,8 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     @Qualifier("jwtRefreshTokenAuthProvider")
     private JwtAuthenticationProvider refreshTokenAuthProvider;
+    @Autowired
+    private Cookies cookies;
 
     @Override
     public AuthTokenResponse login(LoginRequest loginRequest, HttpServletResponse response, HttpServletRequest request) throws AuthenticationException, NoSuchAlgorithmException {
@@ -73,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
         // Optionally update the user's last login (can be done asynchronously)
 //        userService.updateLastLogin(user.getId());
 
-        Cookies.setTokenCookies(response, tokens.getAccessToken(), tokens.getRefreshToken());
+        cookies.setTokenCookies(response, tokens.getAccessToken(), tokens.getRefreshToken());
 
         return tokens;
     }
@@ -89,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenService.revokeRefreshToken(token.getId());
 
         // Delete the token cookies
-        Cookies.deleteCookie(response);
+        cookies.deleteCookie(response);
 
         return new MessageResponse("Logged out successfully", "OK");
     }

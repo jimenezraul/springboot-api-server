@@ -4,6 +4,7 @@ import com.api_server.API.Server.dto.auth.AuthTokenResponse;
 import com.api_server.API.Server.models.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -28,6 +29,15 @@ import java.time.temporal.ChronoUnit;
  */
 @Component
 public class TokenGenerator {
+    @Value("${token.access.expiration.minutes}")
+    private int accessTokenExpirationMinutes;
+
+    @Value("${token.refresh.expiration.days}")
+    private int refreshTokenExpirationDays;
+
+    @Value("${token.activation.expiration.hours}")
+    private int activationTokenExpirationHours;
+
     @Autowired
     private JwtEncoder accessTokenEncoder;
 
@@ -63,20 +73,17 @@ public class TokenGenerator {
     }
 
     public String createActivationToken(UserEntity user) {
-        long activationTokenExpiresIn = 24;
-        return createToken(user, accessTokenEncoder, activationTokenExpiresIn, ChronoUnit.HOURS);
+        return createToken(user, accessTokenEncoder, activationTokenExpirationHours, ChronoUnit.HOURS);
     }
 
     public String createAccessToken(Authentication authentication) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
-        long accessTokenExpiresIn = 15;
-        return createToken(user, accessTokenEncoder, accessTokenExpiresIn, ChronoUnit.MINUTES);
+        return createToken(user, accessTokenEncoder, accessTokenExpirationMinutes, ChronoUnit.MINUTES);
     }
 
     private String createRefreshToken(Authentication authentication) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
-        long refreshTokenExpiresIn = 30;
-        return createToken(user, refreshTokenEncoder, refreshTokenExpiresIn, ChronoUnit.DAYS);
+        return createToken(user, refreshTokenEncoder, refreshTokenExpirationDays, ChronoUnit.DAYS);
     }
 
     public AuthTokenResponse createToken(Authentication authentication) {

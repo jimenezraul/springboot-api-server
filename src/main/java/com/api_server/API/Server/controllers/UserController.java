@@ -9,12 +9,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for handling user-related endpoints.
+ * Provides an endpoint to retrieve information about the currently authenticated user.
+ */
 @RestController
 @RequestMapping("/api/v1")
 public class UserController {
+
     @Autowired
     private UserService userService;
 
+    /**
+     * Endpoint to retrieve information about the currently authenticated user.
+     * This endpoint is restricted to users with the "ROLE_STAFF" role.
+     *
+     * @return a ResponseEntity containing the user's information as a MeDTO object
+     */
     @GetMapping("/me")
     @PreAuthorize("hasRole('ROLE_STAFF')")
     public ResponseEntity<MeDTO> getMe() {

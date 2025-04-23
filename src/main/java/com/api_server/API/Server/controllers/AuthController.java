@@ -6,7 +6,6 @@ import com.api_server.API.Server.dto.auth.LoginRequest;
 import com.api_server.API.Server.services.ServiceImpl.AuthServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import javax.naming.AuthenticationException;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * REST controller for handling authentication-related endpoints.
+ * Provides endpoints for login, logout, and token refresh operations.
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {

@@ -30,6 +30,8 @@ public class RefreshTokenImpl implements RefreshTokenService {
     private RefreshTokenRepository refreshTokenRepository;
     @Autowired
     private TokenGenerator tokenGenerator;
+    @Autowired
+    private Cookies cookies;
 
     @Override
     public void createRefreshToken(HttpServletRequest request, String token, Long userId) throws NoSuchAlgorithmException {
@@ -63,7 +65,7 @@ public class RefreshTokenImpl implements RefreshTokenService {
             }
         }
 
-        Cookies.deleteCookie(response);
+        cookies.deleteCookie(response);
         throw new UserNotFoundException("Refresh token not found");
 
     }
@@ -104,7 +106,7 @@ public class RefreshTokenImpl implements RefreshTokenService {
         }
 
         if (!isApp) {
-            Cookies.setTokenCookies(response, tokens.getAccessToken(), tokens.getRefreshToken());
+            cookies.setTokenCookies(response, tokens.getAccessToken(), tokens.getRefreshToken());
         }
 
         return tokens;

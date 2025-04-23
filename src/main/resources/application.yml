@@ -45,3 +45,13 @@ management:
     web:
       exposure:
         include: "*"
+token:
+  access:
+    expiration:
+      minutes: 15
+  refresh:
+    expiration:
+      days: 30
+  activation:
+    expiration:
+      hours: 24
