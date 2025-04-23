@@ -19,10 +19,13 @@ import org.springframework.security.oauth2.server.resource.authentication.Bearer
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * Filter for processing access tokens in incoming HTTP requests.
+ * This filter extracts access tokens from cookies or headers, validates them, and sets the authentication context.
+ */
 @Log4j2
 public class AccessTokenFilter extends OncePerRequestFilter {
 
@@ -30,6 +33,13 @@ public class AccessTokenFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
     private final JwtToUserConverter jwtToUserConverter;
 
+    /**
+     * Constructor for AccessTokenFilter.
+     *
+     * @param accessTokenAuthProvider the JWT authentication provider for validating access tokens
+     * @param userRepository the repository for accessing user data
+     * @param jwtToUserConverter the converter for transforming JWTs into user authentication objects
+     */
     public AccessTokenFilter(JwtAuthenticationProvider accessTokenAuthProvider,
                              UserRepository userRepository,
                              JwtToUserConverter jwtToUserConverter) {
@@ -38,6 +48,15 @@ public class AccessTokenFilter extends OncePerRequestFilter {
         this.jwtToUserConverter = jwtToUserConverter;
     }
 
+    /**
+     * Processes incoming HTTP requests to extract and validate access tokens.
+     *
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param filterChain the filter chain to pass the request and response to the next filter
+     * @throws ServletException if an error occurs during request processing
+     * @throws IOException if an I/O error occurs during request processing
+     */
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
@@ -60,6 +79,13 @@ public class AccessTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Extracts the access token from the HTTP request.
+     * The token can be found in cookies or the Authorization header.
+     *
+     * @param request the HTTP request
+     * @return an Optional containing the access token if found, or an empty Optional otherwise
+     */
     private Optional<String> parseAccessToken(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -77,6 +103,12 @@ public class AccessTokenFilter extends OncePerRequestFilter {
         return Optional.empty();
     }
 
+    /**
+     * Retrieves the user associated with the given access token and creates an authentication object.
+     *
+     * @param accessToken the access token
+     * @return a UsernamePasswordAuthenticationToken representing the authenticated user, or null if the user is banned
+     */
     private UsernamePasswordAuthenticationToken getUserByAccessToken(String accessToken) {
         Authentication authentication = accessTokenAuthProvider.authenticate(new BearerTokenAuthenticationToken(accessToken));
         Jwt jwt = (Jwt) authentication.getCredentials();
@@ -91,6 +123,13 @@ public class AccessTokenFilter extends OncePerRequestFilter {
         return jwtToUserConverter.convert(jwt);
     }
 
+    /**
+     * Retrieves the user entity from the JWT.
+     *
+     * @param jwt the JWT containing user information
+     * @return the UserEntity associated with the JWT
+     * @throws UsernameNotFoundException if the user is not found in the repository
+     */
     private UserEntity getUserFromJwt(Jwt jwt) {
         return userRepository.findByEmail(jwt.getSubject())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

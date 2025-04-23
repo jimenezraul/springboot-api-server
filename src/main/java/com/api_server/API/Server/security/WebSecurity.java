@@ -1,6 +1,5 @@
 package com.api_server.API.Server.security;
 
-
 import com.api_server.API.Server.repository.UserRepository;
 import com.api_server.API.Server.security.filter.AccessTokenFilter;
 import com.nimbusds.jose.jwk.JWK;
@@ -39,6 +38,10 @@ import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+/**
+ * Configuration class for Spring Security.
+ * This class defines the security settings, including CSRF protection, JWT handling, and authentication providers.
+ */
 @Configuration
 @EnableWebSecurity
 @Slf4j
@@ -46,16 +49,25 @@ public class WebSecurity {
 
     @Autowired
     private JwtToUserConverter jwtToUserConverter;
+
     @Autowired
     private KeyUtils keyUtils;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     @Lazy
     private UserDetailsManager userDetailsManager;
+
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Configures the CSRF token repository to use HTTP session and sets the header name for the CSRF token.
+     *
+     * @return the CSRF token repository
+     */
     @Bean
     public CsrfTokenRepository csrfTokenRepository() {
         HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
@@ -63,6 +75,13 @@ public class WebSecurity {
         return repository;
     }
 
+    /**
+     * Configures the security filter chain, including CSRF protection, request authorization, and session management.
+     *
+     * @param http the HttpSecurity object
+     * @return the configured SecurityFilterChain
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -102,12 +121,22 @@ public class WebSecurity {
         return http.build();
     }
 
+    /**
+     * Creates a JWT decoder for access tokens using the public key.
+     *
+     * @return the JWT decoder
+     */
     @Bean
     @Primary
     public JwtDecoder jwtAccessTokenDecoder() {
         return createJwtDecoder(keyUtils.getAccessTokenPublicKey());
     }
 
+    /**
+     * Creates a JWT decoder for refresh tokens using the public key.
+     *
+     * @return the JWT decoder
+     */
     @Bean
     @Qualifier("jwtRefreshTokenDecoder")
     public JwtDecoder jwtRefreshTokenDecoder() {
@@ -115,7 +144,7 @@ public class WebSecurity {
     }
 
     /**
-     * Create a JWT decoder with the provided public key
+     * Helper method to create a JWT decoder with the provided public key.
      *
      * @param publicKey the public key
      * @return the JWT decoder
@@ -125,7 +154,8 @@ public class WebSecurity {
     }
 
     /**
-     * This call is used to create a JWT encoder with the provided public and private keys for access token
+     * Creates a JWT encoder for access tokens using the public and private keys.
+     *
      * @return the JWT encoder
      */
     @Bean
@@ -135,7 +165,8 @@ public class WebSecurity {
     }
 
     /**
-     * This call is used to create a JWT encoder with the provided public and private keys for refresh token
+     * Creates a JWT encoder for refresh tokens using the public and private keys.
+     *
      * @return the JWT encoder
      */
     @Bean
@@ -145,7 +176,7 @@ public class WebSecurity {
     }
 
     /**
-     * Create a JWT encoder with the provided public and private keys
+     * Helper method to create a JWT encoder with the provided public and private keys.
      *
      * @param publicKey the public key
      * @param privateKey the private key
@@ -161,7 +192,7 @@ public class WebSecurity {
     }
 
     /**
-     * Create a JWT authentication provider with the provided JWT decoder for the access token
+     * Creates a JWT authentication provider for access tokens using the JWT decoder.
      *
      * @return the JWT authentication provider
      */
@@ -172,7 +203,7 @@ public class WebSecurity {
     }
 
     /**
-     * Create a JWT authentication provider with the provided JWT decoder for the refresh token
+     * Creates a JWT authentication provider for refresh tokens using the JWT decoder.
      *
      * @return the JWT authentication provider
      */
@@ -182,17 +213,35 @@ public class WebSecurity {
         return createJwtAuthProvider(jwtRefreshTokenDecoder());
     }
 
+    /**
+     * Helper method to create a JWT authentication provider with the provided JWT decoder.
+     *
+     * @param jwtDecoder the JWT decoder
+     * @return the JWT authentication provider
+     */
     private JwtAuthenticationProvider createJwtAuthProvider(JwtDecoder jwtDecoder) {
         JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtDecoder);
         provider.setJwtAuthenticationConverter(jwtToUserConverter);
         return provider;
     }
 
+    /**
+     * Creates an AccessTokenFilter bean for processing access tokens.
+     *
+     * @param jwtAuthProvider the JWT authentication provider
+     * @param userRepository the user repository
+     * @return the AccessTokenFilter
+     */
     @Bean
     public AccessTokenFilter accessTokenFilter(@Qualifier("jwtAccessTokenAuthProvider") JwtAuthenticationProvider jwtAuthProvider, UserRepository userRepository) {
         return new AccessTokenFilter(jwtAuthProvider, userRepository, jwtToUserConverter);
     }
 
+    /**
+     * Creates a DaoAuthenticationProvider bean for handling DAO-based authentication.
+     *
+     * @return the DaoAuthenticationProvider
+     */
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
